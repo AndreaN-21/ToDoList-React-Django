@@ -2,16 +2,18 @@ from rest_framework import serializers
 from .models import Todo
 from django.contrib.auth.models import User
 
-# Il serializer trasforma i dati del modello in formato JSON (utile per il frontend).
-#Il file serializers.py in Django REST Framework (DRF) serve a trasformare i dati tra il 
-# modello di Django e i formati utilizzati dalle API (ad esempio JSON). 
-# In parole semplici, è il "ponte" tra i tuoi dati (modello Django) e ciò che viene inviato o ricevuto nelle richieste API.
-
+"""
+Il serializer trasforma i dati del modello in formato JSON (utile per il frontend).
+Il file serializers.py in Django REST Framework (DRF) serve a trasformare i dati tra il 
+modello di Django e i formati utilizzati dalle API (ad esempio JSON). 
+In parole semplici, è il "ponte" tra i tuoi dati (modello Django) e ciò che viene inviato o ricevuto nelle richieste API.
+"""
 
 class TodoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Todo # Usa il modello Todo.
         fields = '__all__' # Serializza tutti i campi del modello Todo.
+        extra_kwargs = {'author': {'read_only': True}} # L'autore non può essere modificato dall'utente.
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
