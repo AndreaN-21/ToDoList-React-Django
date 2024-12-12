@@ -40,7 +40,8 @@ class TodoListCreate(generics.ListCreateAPIView):
         if serializer.is_valid():
             serializer.save(author=self.request.user)
         else: 
-            print(serializer.errors)
+            print(serializer.errors) 
+    
         
 class TodoDelete(generics.DestroyAPIView): 
     serializer_class = TodoSerializer
@@ -54,7 +55,18 @@ class TodoDelete(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         instance.delete()
     
+class TodoUpdate(generics.UpdateAPIView):
+    serializer_class = TodoSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
+    def get_queryset(self):
+        user = self.request.user
+        return Todo.objects.filter(author=user)
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            serializer.save()  
+        else:
+            print(serializer.errors)
     
     
 class CreateUserView(generics.CreateAPIView):
