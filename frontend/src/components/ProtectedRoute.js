@@ -10,15 +10,11 @@ export default function ProtectedRoute({children}) {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
 
     useEffect(() => {
-        checkAuth() 
+        checkAuth().catch(() => setIsAuthenticated(false))
     }, []);
 
     const refreshToken = async () => {
-        const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-        if (!refreshToken) {
-            setIsAuthenticated(false);
-            return;
-        }
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN); 
         try {
             const response = await api.post("/api/token/refresh/", {
                 refresh: refreshToken
@@ -27,7 +23,7 @@ export default function ProtectedRoute({children}) {
                 setIsAuthenticated(false);
                 return;
             }
-            localStorage.setItem(ACCESS_TOKEN, response.data.accessToken);
+            localStorage.setItem(ACCESS_TOKEN, response.data.access);
             setIsAuthenticated(true);
         } catch (error) {
             console.error(error);
@@ -42,8 +38,7 @@ export default function ProtectedRoute({children}) {
             if (decodedToken.exp * 1000 < Date.now()) {
                 await refreshToken();
             }else 
-                setIsAuthenticated(true);
-            
+                setIsAuthenticated(true); 
         }
         else {
             setIsAuthenticated(false);

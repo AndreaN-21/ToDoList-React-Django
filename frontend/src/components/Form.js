@@ -1,62 +1,49 @@
-import { useState } from "react";
-import api from "../api";
-import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import "../styles/Form.css"
-import LoadingIndicator from "./LoadingIndicator";
+import React, { useState } from 'react';
+import { useTodos } from '../store';
+import api from '../api';
 
-function Form({ route, method }) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+const Form = () => {
 
-    const name = method === "login" ? "Login" : "Register";
 
-    const handleSubmit = async (e) => {
-        setLoading(true);
+    const addTodo = useTodos((state) => state.addTodo)
+    const [title, setTitle] = useState(""); 
+
+    const createTodo= (e) => { 
         e.preventDefault();
-
-        try {
-            const res = await api.post(route, { username, password })
-            if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access);
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-                navigate("/")
-            } else {
-                navigate("/login")
-            }
-        } catch (error) {
-            alert(error)
-        } finally {
-            setLoading(false)
-        }
+        api
+            .post("/api/todos/", { title })
+            .then((res) => {
+                if (res.status === 201) {
+                  alert("Todo created!");
+                  addTodo({
+                    id:res.data.id, 
+                    title, 
+                    completed: false, 
+                    user: res.data.user, 
+                    created_at: res.data.created_at
+                });
+                }
+                else alert("Failed to make todo."); 
+            })
+            .catch((err) => alert(err));
     };
 
-    return (
-        <form onSubmit={handleSubmit} className="form-container">
-            <h1>{name}</h1>
+    return(
+        <form onSubmit={createTodo}>
+            <label htmlFor="title">Title:</label>
+            <br />
             <input
-                className="form-input"
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-            />
-            <input
-                className="form-input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-            />
-            {loading && <LoadingIndicator />}
-            <button className="form-button" type="submit">
-                {name}
-            </button>
-            <a href={method === "login" ? "/register" : "/login"}>{method === "login" ? "Create a new account" : "Login"}</a>
+                id="title"
+                name="title"
+                required
+                onChange={(e) => setTitle(e.target.value)}
+                value={title}
+            />  
+            <input type="submit" value="Add"></input>
         </form>
-    );
+    )
 }
 
-export default Form
+
+export default Form;
